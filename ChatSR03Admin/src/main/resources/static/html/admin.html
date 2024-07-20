@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:insert="~{partials/reusable :: head}"></th:block>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/CSS/utilisateur.css">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+</head>
+
+<body>
+<header>
+    <th:block th:insert="~{partials/reusable :: header}"></th:block>
+</header>
+
+<div class="container mt-4">
+    <h1 class="text-center">Liste des utilisateurs</h1>
+    <div class="row">
+        <div class="col-1">
+            <a href="/inscription" class="btn">
+                <span class="material-symbols-outlined"> add </span>
+            </a>
+        </div>
+        <div class="col-2">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="disabledUsersCheck" name="disabledUsers"
+                       th:checked="${disabledUsers}" onclick="updateUsers()">
+                <label class="form-check-label" for="disabledUsersCheck">
+                    Utilisateurs désactivés
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="enabledUsersCheck" name="enabledUsers"
+                       th:checked="${enabledUsers}" onclick="updateUsers()">
+                <label class="form-check-label" for="enabledUsersCheck">
+                    Utilisateurs activés
+                </label>
+            </div>
+        </div>
+        <div class="col-2">
+            <select id="sortOrder" class="form-select" onchange="updateUrlParams()">
+                <option value="ASC">Croissant</option>
+                <option value="DESC">Decroissant</option>
+            </select>
+        </div>
+        <div class="col"></div>
+        <div class="col-5">
+            <form id="searchForm" method="get" th:action="@{/user/admin}">
+                <div class="input-group">
+                    <input type="text" class="form-control border-end-0" placeholder="Rechercher un utilisateur"
+                           name="search">
+                    <button class="" type="submit">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div th:if="${utilisateurs.isEmpty()}">
+        <div class="container">
+            <div class="alert alert-danger alert-dismissible text-center fade show" role="alert">
+                Il n'y a pas d'utilisateurs ...
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-success alert-dismissible text-center fade show" role="alert">
+                Ajouter un utilisateur ...
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    <div th:if="${not utilisateurs.isEmpty()}">
+        <div th:each="utilisateur : ${utilisateurs}">
+            <div class="container-fluid media ml-5 mr-5 my-2">
+                <div class="row">
+                    <div class="col">
+                        <div class="media-body">
+                            <div class="row">
+                                <div id="userDisplay" class="col">
+                                    <div class="d-flex justify-content-center">
+                                        <h4 class="media-heading">
+                                            <span th:text="${utilisateur.firstName + ' ' + utilisateur.lastName}"></span>
+                                        </h4>
+                                    </div>
+                                    <p>Email : <span th:text="${utilisateur.email}"></span>
+                                    <p>Rôle :
+                                        <span th:switch="${utilisateur.isAdmin}">
+                                                <span th:case="True" class="badge bg-primary"
+                                                      th:text="Administrateur"></span>
+                                                <span th:case="False" class="badge bg-secondary"
+                                                      th:text="Utilisateur"></span>
+                                        </span>
+                                    </p>
+                                    <p>Etat :
+                                        <span th:switch="${utilisateur.isActivated}">
+                                                <span th:case="True" id="userAcivated" class="badge bg-success"
+                                                      th:text="Activé"></span>
+                                                <span th:case="False" id="userDesactivated" class="badge bg-danger"
+                                                      th:text="Désactivé"></span>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-2">
+                        <div class="text-center mt-5">
+                            <div class="form-check">
+                                <form id="AdminUser" method="POST"
+                                      th:action="@{'/user/updateadmin/' + ${utilisateur.idUser}}">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="adminCheck-${utilisateur.idUser}" name="activated"
+                                           th:checked="${utilisateur.isAdmin}" onchange="this.form.submit()">
+                                    <label class="form-check-label" for="adminCheck-${utilisateur.idUser}">
+                                        Administrateur/Utilisateur
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="text-center mt-5">
+                            <div class="form-check">
+                                <form id="ActivateUser" method="POST"
+                                      th:action="@{'/user/updatestatus/' + ${utilisateur.idUser}}">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="activatedCheck-${utilisateur.idUser}" name="activated"
+                                           th:checked="${utilisateur.isActivated}" onchange="this.form.submit()">
+                                    <label class="form-check-label" for="activatedCheck-${utilisateur.idUser}">
+                                        Activer/Désactiver
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="text-center mt-5">
+                            <a th:href="@{'/user/edit/' + ${utilisateur.idUser}}" class="btn btn-primary" role="button"
+                               style="outline: olive">
+                                Modifier
+                            </a>
+                            <form id="deleteUser" method="POST" th:action="@{'/user/delete/'+ ${utilisateur.idUser}}">
+                                <button class="btn btn-danger mt-2" type="submit">
+                                        <span class="material-symbols-outlined">
+                                            delete
+                                        </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a th:if="${utilisateurs.number > 0}"
+                               th:with="previousPage=${utilisateurs.number - 1}"
+                               th:href="@{'/user/admin?page=' + ${previousPage} + '&size=' + ${pageSize} + '&disabledUsers=' + ${disabledUsers} + '&enabledUsers=' + ${enabledUsers}}"
+                               class="page-link">Précédent</a>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a class="page-link"
+                               th:href="@{'/user/admin?page=' + ${i} + '&size=' + ${pageSize} + '&disabledUsers=' + ${disabledUsers} + '&enabledUsers=' + ${enabledUsers}}"
+                               th:text="${i} + 1"></a>
+                        </li>
+                        <li class="page-item">
+                            <a th:if="${utilisateurs.number < totalPages - 1}"
+                               th:with="nextPage=${utilisateurs.number + 1}"
+                               th:href="@{'/user/admin?page=' + ${nextPage} + '&size=' + ${pageSize} + '&disabledUsers=' + ${disabledUsers} + '&enabledUsers=' + ${enabledUsers}}"
+                               class="page-link">Suivant</a>
+                        </li>
+                    </ul>
+
+                </nav>
+                <form th:action="@{/user/admin}" method="get">
+                    <div class="input-group">
+                        <select id="page-size" class="form-select" name="size" onchange="this.form.submit()">
+                            <option value="3" th:selected="${pageSize == 3}">3</option>
+                            <option selected="selected" value="5" th:selected="${pageSize == 5}">5</option>
+                            <option value="10" th:selected="${pageSize == 10}">10</option>
+                        </select>
+                        <input type="hidden" id="current-page" name="page" th:value="${utilisateurs.number}">
+                        <input type="hidden" name="disabledUsers" th:value="${disabledUsers}">
+                        <input type="hidden" name="enabledUsers" th:value="${enabledUsers}">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<footer>
+    <th:block th:insert="~{partials/reusable :: footer}"></th:block>
+</footer>
+
+<script>
+
+    function updateUrlParams() {
+        const sortOrder = document.getElementById("sortOrder").value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set("sort", sortOrder);
+        history.pushState({}, "", currentUrl);
+        window.location.reload();
+    }
+
+    function updateUsers() {
+        const disabledUsersCheckbox = document.getElementById("disabledUsersCheck");
+        const enabledUsersCheckbox = document.getElementById("enabledUsersCheck");
+        const pageSize = document.getElementById("page-size").value;
+        const currentPage = document.getElementById("current-page").value;
+        const searchValue = getUrlParams()['search'];
+
+        const disabledUsers = disabledUsersCheckbox.checked;
+        const enabledUsers = enabledUsersCheckbox.checked;
+
+        const params = {
+            'page': currentPage,
+            'size': pageSize,
+            'disabledUsers': disabledUsers,
+            'enabledUsers': enabledUsers,
+        };
+
+        if (searchValue) {
+            params['search'] = searchValue;
+        }
+
+        window.location.href = '/user/admin?' + new URLSearchParams(params).toString();
+    }
+
+    function getUrlParams() {
+        const params = {};
+        const search = window.location.search.substring(1);
+        const vars = search.split("&");
+        for (let i = 0; i < vars.length; i++) {
+            const pair = vars[i].split("=");
+            params[pair[0]] = decodeURIComponent(pair[1]);
+        }
+        return params;
+    }
+
+    function updateFormAction() {
+        const currentSort = getUrlParams()['sort'];
+        const searchForm = document.getElementById('searchForm');
+        const currentParams = getUrlParams();
+
+        let formAction = '/user/admin';
+
+        // Supprimer les paramètres de recherche de l'objet currentParams
+        delete currentParams['search'];
+
+        // Construire l'URL du formulaire avec les paramètres existants
+        const paramString = Object.entries(currentParams)
+            .map(([key, value]) => `${key}=${value}`)
+            .join('&');
+
+        if (paramString) {
+            formAction += '?' + paramString;
+        }
+        console.log(formAction);
+
+        // Ajouter un événement d'écoute sur le soumission du formulaire
+        searchForm.addEventListener('submit', function (event) {
+            // Récupérer la valeur du champ de recherche
+            const searchValue = document.querySelector('input[name="search"]').value;
+            // Mise à jour du paramètre de recherche dans l'URL
+            const newParams = {...currentParams, search: encodeURIComponent(searchValue)};
+            const newParamString = Object.entries(newParams)
+                .map(([key, value]) => `${key}=${value}`)
+                .join('&');
+            // Rediriger vers la nouvelle URL
+            window.location.href = formAction + (paramString ? '&' : '?') + newParamString;
+            // Empêcher le formulaire de soumettre normalement
+            event.preventDefault();
+        });
+        const sortOrderSelect = document.getElementById('sortOrder');
+        sortOrderSelect.value = currentSort || 'ASC';
+    }
+
+    // Call updateFormAction on page load
+    window.onload = function () {
+        updateFormAction();
+    };
+</script>
+</html>

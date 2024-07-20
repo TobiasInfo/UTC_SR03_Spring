@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:insert="~{partials/reusable :: head}"></th:block>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="/CSS/inscription.css">
+</head>
+
+<body>
+
+<header>
+    <th:block th:insert="~{partials/reusable :: header}"></th:block>
+</header>
+
+
+<div class="d-flex justify-content-center">
+    <div class="centre-vertical" style="min-width: 35vw">
+        <div class="card mx-auto b-2 my-2">
+            <div class="card-header text-center">
+                <h4 th:text="${pageTitle}">Inscription</h4>
+            </div>
+
+            <div class="card-body ">
+                <form th:action="@{'/user/edit/' + ${user.idUser}}" th:object="${user}" method="POST">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input id="email" th:field="*{email}" type="email" name="email" class="form-control"
+                               placeholder="exemple@gmail.com" autofocus required onchange="verifMail_inscription()">
+                    </div>
+
+                    <div class="form-group">
+                        <span id="msg_email"></span>
+                    </div>
+                    <label>Mot de passe</label>
+                    <div class="form-group visibility_password">
+                        <input id="mdp1" th:field="*{password}" name="password" class="form-control"
+                               placeholder="hyper_secure" required>
+                        <div class="password-icon">
+                                <span class="material-symbols-outlined visibility">
+                                    visibility
+                                </span>
+                            <span class="material-symbols-outlined visililityOff">
+                                    visibility_off
+                                </span>
+                        </div>
+
+                    </div>
+
+                    <label>Confirmation du mot de passe</label>
+                    <div class="form-group visibility_password">
+                        <input id="mdp2" name="password2" class="form-control"
+                               placeholder="hyper_secure" required
+                               onchange="verifMdp()">
+                        <div class="password-icon">
+                                <span id="visibility2OK" class="material-symbols-outlined visibility">
+                                    visibility
+                                </span>
+                            <span id="visibility2OFF" class="material-symbols-outlined visililityOff">
+                                    visibility_off
+                                </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input id="nom" th:field="*{lastName}" type="text" name="nom" class="form-control"
+                               placeholder="John" required/>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prénom</label>
+                        <input id="prenom" th:field="*{firstName}" type="text" name="prenom" class="form-control"
+                               placeholder="Wick"
+                               required/>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" onclick="return checkPasswordMatch()">
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<footer>
+    <th:block th:insert="~{partials/reusable :: footer}"></th:block>
+</footer>
+
+<script>
+
+    passwd1 = document.querySelector("#mdp1");
+    passwd2 = document.querySelector("#mdp2");
+    passwd2.value = passwd1.value;
+
+
+    function checkPasswordMatch() {
+        const password1 = document.querySelector("#mdp1").value;
+        const password2 = document.querySelector("#mdp2").value;
+
+        if (password1 !== password2) {
+            alert("Passwords do not match.");
+            return false;
+        }
+        return true;
+    }
+
+    const eye = document.querySelector(".visibility_password .password-icon .visibility");
+    const eyeoff = document.querySelector(".visibility_password .password-icon .visililityOff");
+    const eye2off = document.querySelector("#visibility2OFF");
+    const eye2 = document.querySelector("#visibility2OK");
+    const passwordField = document.querySelector("#mdp1");
+    const passwordField2 = document.querySelector("#mdp2");
+    eye.addEventListener("click", () => {
+        eye.style.display = "none";
+        eyeoff.style.display = "block";
+        passwordField.type = "text";
+    });
+
+    eyeoff.addEventListener("click", () => {
+        console.log("click");
+        eyeoff.style.display = "none";
+        eye.style.display = "block";
+        passwordField.type = "password";
+    });
+
+    eye2.addEventListener("click", () => {
+        eye2.style.display = "none";
+        eye2off.style.display = "block";
+        passwordField2.type = "text";
+    });
+
+    eye2off.addEventListener("click", () => {
+        console.log("click");
+        eye2off.style.display = "none";
+        eye2.style.display = "block";
+        passwordField2.type = "password";
+    });
+</script>
+</html>

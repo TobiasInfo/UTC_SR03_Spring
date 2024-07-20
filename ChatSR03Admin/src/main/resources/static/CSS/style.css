@@ -1,0 +1,49 @@
+.btn {
+    border-radius: 20px;
+}
+
+nav {
+    height: 50px;
+}
+
+body {
+    padding-top: 70px;
+    padding-bottom: 50px;
+    min-height: 100vh;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    z-index : 1;
+}
+
+
+footer {
+    height: 30px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+}
+
+
+.blanc {
+    color: white;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.body-content {
+    padding-top: 200px;
+    padding-bottom: 50px;
+}
